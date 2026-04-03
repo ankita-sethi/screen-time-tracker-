@@ -14,6 +14,8 @@ CATEGORIES = {
     "LinkedIn": "#0A66C2",
     "Gmail": "#EA4335",
     "Streaming": "#E50914",
+    "GitHub": "#8957e5",
+    "VS Code": "#007ACC",
 }
 
 
@@ -151,6 +153,8 @@ def api_weekly():
                 "LinkedIn": entry.get("LinkedIn", 0),
                 "Gmail": entry.get("Gmail", 0),
                 "Streaming": entry.get("Streaming", 0),
+                "GitHub": entry.get("GitHub", 0),
+                "VS Code": entry.get("VS Code", 0),
             }
         )
 
@@ -260,7 +264,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .toggle button.active { background:#5b5ef4; color:#fff; border-color:#5b5ef4; }
 
   /* Cards */
-  .cards { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-bottom:28px; }
+  .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:28px; }
   .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; }
   .card .label { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
   .card .value { font-size:1.8rem; font-weight:700; margin-top:4px; }
@@ -318,7 +322,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <button class="manage-btn" onclick="openModal()">Manage Data</button>
     <div class="header-center">
       <h1><span class="live-dot"></span>Screen Time Tracker<span id="pausedBadge" class="paused-badge" style="display:none">Paused</span></h1>
-      <p class="subtitle">Tracking LeetCode · LinkedIn · Gmail · Streaming on Chrome</p>
+      <p class="subtitle">Tracking LeetCode · LinkedIn · Gmail · Streaming · GitHub · VS Code</p>
     </div>
     <button class="pause-btn" id="pauseBtn" onclick="togglePause()">Tracking Active</button>
   </div>
@@ -347,6 +351,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       <span><span class="legend-dot" style="background:#0A66C2"></span>LinkedIn</span>
       <span><span class="legend-dot" style="background:#EA4335"></span>Gmail</span>
       <span><span class="legend-dot" style="background:#E50914"></span>Streaming</span>
+      <span><span class="legend-dot" style="background:#8957e5"></span>GitHub</span>
+      <span><span class="legend-dot" style="background:#007ACC"></span>VS Code</span>
     </div>
     <canvas id="weeklyChart" height="260"></canvas>
   </div>
@@ -360,8 +366,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </div>
 
 <script>
-const COLORS = { LeetCode:"#FFA116", LinkedIn:"#0A66C2", Gmail:"#EA4335", Streaming:"#E50914" };
-const CATS = ["LeetCode","LinkedIn","Gmail","Streaming"];
+const COLORS = { LeetCode:"#FFA116", LinkedIn:"#0A66C2", Gmail:"#EA4335", Streaming:"#E50914", GitHub:"#8957e5", "VS Code":"#007ACC" };
+const CATS = ["LeetCode","LinkedIn","Gmail","Streaming","GitHub","VS Code"];
 let period = "today";
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -566,16 +572,23 @@ async function load() {
   updateGreeting(summary.morning_greeting);
   updatePauseUI(summary.tracking_enabled);
 
-  // Cards — always show all 4 categories
-  document.getElementById("cards").innerHTML = CATS.map(function(c) {
-    var s = 0;
-    data.forEach(function(d) { if (d.category === c) s = d.seconds; });
-    var pct = total > 0 ? Math.round(s / total * 100) : 0;
-    var warn = (c === "Streaming" && s >= 1800) ? " warning" : "";
-    return '<div class="card' + warn + '"><div class="label" style="color:' + COLORS[c] + '">' + c + '</div>'
-      + '<div class="value">' + fmt(s) + '</div>'
-      + '<div class="sub">' + pct + '% of tracked</div></div>';
-  }).join("");
+  // Cards — only show categories with time > 0 for the selected period
+  var activeCats = CATS.filter(function(c) {
+    return data.some(function(d) { return d.category === c && d.seconds > 0; });
+  });
+  if (activeCats.length === 0) {
+    document.getElementById("cards").innerHTML = '<div class="empty" style="grid-column:1/-1">No data yet — open a tracked site in Chrome or VS Code</div>';
+  } else {
+    document.getElementById("cards").innerHTML = activeCats.map(function(c) {
+      var s = 0;
+      data.forEach(function(d) { if (d.category === c) s = d.seconds; });
+      var pct = total > 0 ? Math.round(s / total * 100) : 0;
+      var warn = (c === "Streaming" && s >= 1800) ? " warning" : "";
+      return '<div class="card' + warn + '"><div class="label" style="color:' + COLORS[c] + '">' + c + '</div>'
+        + '<div class="value">' + fmt(s) + '</div>'
+        + '<div class="sub">' + pct + '% of tracked</div></div>';
+    }).join("");
+  }
 
   // Bars
   if (data.length === 0) {

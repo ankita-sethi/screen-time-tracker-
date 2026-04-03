@@ -22,6 +22,8 @@ SITE_RULES = [
     {"keyword": "mail.google", "category": "Gmail"},
     {"keyword": "netflix.com", "category": "Streaming"},
     {"keyword": "primevideo.com", "category": "Streaming"},
+    {"keyword": "github.com", "category": "GitHub"},
+    {"keyword": "vscode", "category": "VS Code"},
 ]
 
 # In-memory tracking for streaming alerts (reset daily)
@@ -77,6 +79,7 @@ def get_chrome_tab():
     tell application "System Events"
         set frontApp to name of first application process whose frontmost is true
     end tell
+    if frontApp is "Code" then return "VS Code|||vscode"
     if frontApp is not "Google Chrome" then return "NOT_CHROME"
     tell application "Google Chrome"
         set w to front window
@@ -190,7 +193,7 @@ def run():
     init_db()
     print(f"Screen Time Tracker started (PID {os.getpid()})")
     print(f"Logging to {DB_PATH}")
-    print("Tracking: LeetCode · LinkedIn · Gmail · Streaming  (Chrome only)")
+    print("Tracking: LeetCode · LinkedIn · Gmail · Streaming · GitHub · VS Code")
     print(f"Polling every {POLL_INTERVAL}s — Ctrl+C to stop.\n")
 
     signal.signal(signal.SIGINT, lambda *_: (print("\nStopped."), sys.exit(0)))
