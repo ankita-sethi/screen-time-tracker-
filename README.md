@@ -1,6 +1,6 @@
 # Screen Time Tracker
 
-A local macOS app that tracks how much time you spend on LeetCode, job search sites (LinkedIn, Workday, career/job pages), Gmail, GitHub, and streaming sites (Netflix, Prime Video) in Google Chrome — plus VS Code as a native app — and displays it on a live-updating dashboard. Built for personal productivity — everything runs on your Mac, nothing leaves your machine.
+A local macOS app that tracks how much time you spend on LeetCode, job search sites (LinkedIn, Workday, career/job pages), Gmail, GitHub, and streaming sites (Netflix, Prime Video) in Google Chrome, plus VS Code as a native app and displays it on a live-updating dashboard. Built for personal productivity everything runs on your Mac, nothing leaves your machine.
 
 ---
 
@@ -9,13 +9,13 @@ A local macOS app that tracks how much time you spend on LeetCode, job search si
 - Tracks 6 categories: LeetCode, Job Search, Gmail, Streaming, GitHub, VS Code
 - Job Search covers LinkedIn, Workday, and any URL with `/career` or `/job`
 - Dark-themed dashboard at `http://localhost:8050` with auto-refresh every 10s
-- Adaptive cards — only categories with tracked time appear
+- Adaptive cards: only categories with tracked time appear
 - Stacked 7-day bar chart and time breakdown bars
 - Streaming alerts at 30min and 45min (macOS notifications)
 - Pause/resume tracking from the dashboard
 - Morning greeting with yesterday's LeetCode stats
 - Incognito windows automatically skipped
-- Data management — delete by month from the dashboard
+- Data management: delete by month from the dashboard
 - Auto-starts on login via macOS launchd
 
 ---
@@ -32,14 +32,14 @@ A local macOS app that tracks how much time you spend on LeetCode, job search si
 
 ## Tech Stack
 
-| Technology | Why |
-|---|---|
-| Python 3 | Tracker and dashboard server |
-| Flask | REST API and dashboard serving |
-| SQLite | Local file-based storage, zero config |
-| AppleScript | Reads the active Chrome tab |
+| Technology          | Why                                     |
+| ------------------- | --------------------------------------- |
+| Python 3            | Tracker and dashboard server            |
+| Flask               | REST API and dashboard serving          |
+| SQLite              | Local file-based storage, zero config   |
+| AppleScript         | Reads the active Chrome tab             |
 | Vanilla HTML/CSS/JS | Dashboard UI, no framework dependencies |
-| macOS launchd | Auto-starts services on login |
+| macOS launchd       | Auto-starts services on login           |
 
 ---
 
