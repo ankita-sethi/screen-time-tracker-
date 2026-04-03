@@ -383,7 +383,7 @@ function updateGreeting(morningGreeting) {
   if (morningGreeting) {
     el.textContent = "Good morning! " + morningGreeting;
   } else {
-    el.innerHTML = "Good morning! No LeetCode yesterday \\u2014 let\\u2019s fix that today \\uD83D\\uDCAA";
+    el.textContent = "Good morning! No LeetCode yesterday \\u2014 let\\u2019s fix that today \\uD83D\\uDCAA";
   }
   el.style.display = "block";
 }
@@ -430,21 +430,28 @@ function closeModal() {
 
 // Renders the two-option view inside the modal.
 function renderModalOptions() {
-  document.getElementById("modalContent").innerHTML =
+  var mc = document.getElementById("modalContent");
+  mc.innerHTML =
     '<div class="modal-title">Delete Data</div>' +
-    '<button class="modal-btn danger" onclick="confirmDelete(\'before-this-month\')">Delete data before this month</button>' +
-    '<button class="modal-btn danger" onclick="confirmDelete(\'this-month\')">Delete this month\\u2019s data</button>' +
-    '<button class="modal-btn cancel" onclick="closeModal()">Cancel</button>';
+    '<button class="modal-btn danger" id="mdDelBefore">Delete data before this month</button>' +
+    '<button class="modal-btn danger" id="mdDelThis">Delete this month\\u2019s data</button>' +
+    '<button class="modal-btn cancel" id="mdCancel">Cancel</button>';
+  mc.querySelector("#mdDelBefore").onclick = function() { confirmDelete("before-this-month"); };
+  mc.querySelector("#mdDelThis").onclick = function() { confirmDelete("this-month"); };
+  mc.querySelector("#mdCancel").onclick = closeModal;
 }
 
 // Switches the modal to the confirmation view for a given delete target.
 function confirmDelete(target) {
   _confirmTarget = target;
-  document.getElementById("modalContent").innerHTML =
+  var mc = document.getElementById("modalContent");
+  mc.innerHTML =
     '<div class="modal-title">Are you sure?</div>' +
     '<p class="modal-text">This cannot be undone.</p>' +
-    '<button class="modal-btn danger" onclick="executeDelete()">Yes, delete</button>' +
-    '<button class="modal-btn cancel" onclick="renderModalOptions()">Cancel</button>';
+    '<button class="modal-btn danger" id="mdYes">Yes, delete</button>' +
+    '<button class="modal-btn cancel" id="mdNo">Cancel</button>';
+  mc.querySelector("#mdYes").onclick = executeDelete;
+  mc.querySelector("#mdNo").onclick = renderModalOptions;
 }
 
 // Calls the delete API and refreshes the dashboard on success.
