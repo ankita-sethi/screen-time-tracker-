@@ -29,18 +29,44 @@ To uninstall: `bash uninstall.sh`
 ## Architecture
 
 ```
-┌─────────────┐     AppleScript      ┌──────────────┐     SQLite      ┌──────────────┐
-│Google Chrome │ ◄── (osascript) ──── │  tracker.py   │ ──────────►   │ screentime.db │
-│  (your tabs) │     reads active     │  polls every  │   writes      │  (local file) │
-└─────────────┘     tab title + URL   │   5 seconds   │   rows        └───────┬───────┘
-                                      └──────────────┘                        │
-                                                                              │ reads
-                                                                              ▼
-┌─────────────┐     HTTP / JSON       ┌──────────────┐              ┌──────────────┐
-│   Browser    │ ◄─────────────────── │    app.py     │ ◄─────────  │  SQLite DB   │
-│  Dashboard   │   auto-refreshes     │ Flask server  │   queries   └──────────────┘
-│  :8050       │   every 10 sec       │  port 8050    │
-└─────────────┘                       └──────────────┘
+                          ┌───────────────────┐
+                          │   Google Chrome    │
+                          │   (your tabs)      │
+                          └────────┬──────────┘
+                                   │
+                          AppleScript reads
+                          active tab title + URL
+                                   │
+                                   ▼
+                          ┌───────────────────┐
+                          │   tracker.py       │
+                          │   (polls every 5s) │
+                          └────────┬──────────┘
+                                   │
+                              writes rows
+                                   │
+                                   ▼
+                          ┌───────────────────┐
+                          │   screentime.db   │
+                          │   (SQLite file)   │
+                          └────────┬──────────┘
+                                   │
+                              queries data
+                                   │
+                                   ▼
+                          ┌───────────────────┐
+                          │     app.py        │
+                          │  (Flask :8050)    │
+                          └────────┬──────────┘
+                                   │
+                            JSON responses
+                          (auto-refresh 10s)
+                                   │
+                                   ▼
+                          ┌───────────────────┐
+                          │    Dashboard      │
+                          │   (Browser UI)    │
+                          └───────────────────┘
 ```
 
 ---

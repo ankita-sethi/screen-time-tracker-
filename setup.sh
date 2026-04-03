@@ -101,7 +101,7 @@ cat > "$PLIST_DIR/com.screentime.morning-open.plist" <<EOF
     <array>
         <string>/bin/bash</string>
         <string>-c</string>
-        <string>while true; do if pgrep -x "Google Chrome" > /dev/null; then open http://localhost:8050; sleep 86400; fi; sleep 30; done</string>
+        <string>while true; do TODAY=\$(date +%Y-%m-%d); if [ ! -f /tmp/screentime-opened-\$TODAY ] &amp;&amp; pgrep -x "Google Chrome" > /dev/null; then open http://localhost:8050; touch /tmp/screentime-opened-\$TODAY; fi; sleep 30; done</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
