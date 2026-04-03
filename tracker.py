@@ -72,15 +72,34 @@ def is_tracking_enabled():
         return True
 
 
-# Uses AppleScript to get the active Chrome tab's title and URL.
-# Returns (None, None) if Chrome is not frontmost, window is incognito, or error.
-def get_chrome_tab():
+# Gets the frontmost app name using lsappinfo (no permissions required).
+# Returns the display name string (e.g. "Code", "Google Chrome"), or None on error.
+def get_frontmost_app():
+    try:
+        # Step 1: get the ASN (app serial number) of the frontmost app
+        asn = subprocess.run(
+            ["lsappinfo", "front"], capture_output=True, text=True, timeout=3
+        ).stdout.strip()
+        if not asn:
+            return None
+        # Step 2: get the display name for that ASN
+        r = subprocess.run(
+            ["lsappinfo", "info", "-only", "name", asn],
+            capture_output=True, text=True, timeout=3,
+        )
+        # Output looks like: "LSDisplayName"="Code"
+        out = r.stdout.strip()
+        if '="' in out:
+            return out.split('="', 1)[1].rstrip('"')
+    except Exception:
+        pass
+    return None
+
+
+# Reads the active Chrome tab's title, URL, and incognito status via AppleScript.
+# Returns (title, url) or (None, None) if incognito or error.
+def get_chrome_tab_info():
     script = '''
-    tell application "System Events"
-        set frontApp to name of first application process whose frontmost is true
-    end tell
-    if frontApp is "Code" then return "VS Code|||vscode"
-    if frontApp is not "Google Chrome" then return "NOT_CHROME"
     tell application "Google Chrome"
         set w to front window
         set m to mode of w
@@ -95,12 +114,25 @@ def get_chrome_tab():
             ["osascript", "-e", script], capture_output=True, text=True, timeout=5
         )
         out = r.stdout.strip()
-        if out in ("NOT_CHROME", "INCOGNITO") or "|||" not in out:
+        if out == "INCOGNITO" or "|||" not in out:
             return None, None
         title, url = out.split("|||", 1)
         return title, url
     except Exception:
         return None, None
+
+
+# Detects the active app and returns (title, url) for classification.
+# Uses lsappinfo for app detection (works under launchd without permissions).
+# Only calls AppleScript when Chrome is active (to read the tab).
+# Returns (None, None) if no trackable app is active.
+def get_active_context():
+    app = get_frontmost_app()
+    if app == "Code":
+        return "VS Code", "vscode"
+    if app == "Google Chrome":
+        return get_chrome_tab_info()
+    return None, None
 
 
 # Matches tab title+URL against SITE_RULES keywords.
@@ -201,7 +233,7 @@ def run():
 
     while True:
         if is_tracking_enabled():
-            title, url = get_chrome_tab()
+            title, url = get_active_context()
             if title:
                 cat = classify(title, url)
                 if cat:

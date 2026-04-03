@@ -50,8 +50,14 @@ cat > "$PLIST_DIR/com.screentime.tracker.plist" <<EOF
     <key>ProgramArguments</key>
     <array>
         <string>/usr/bin/python3</string>
+        <string>-u</string>
         <string>${PROJECT_DIR}/tracker.py</string>
     </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
