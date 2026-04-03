@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Dashboard server — live-updating screen time stats."""
 
+import secrets
 import sqlite3
 import os
 from datetime import datetime, timedelta
@@ -8,6 +9,13 @@ from flask import Flask, jsonify, request
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screentime.db")
 app = Flask(__name__)
+API_TOKEN = secrets.token_hex(16)
+
+
+# Checks the X-API-Token header against the server's token.
+# Returns True if valid, False otherwise.
+def check_token():
+    return request.headers.get("X-API-Token") == API_TOKEN
 
 CATEGORIES = {
     "LeetCode": "#FFA116",
@@ -165,6 +173,8 @@ def api_weekly():
 # Returns the new tracking_enabled boolean.
 @app.route("/api/toggle-tracking", methods=["POST"])
 def api_toggle_tracking():
+    if not check_token():
+        return jsonify({"error": "unauthorized"}), 403
     conn = get_db()
     row = conn.execute(
         "SELECT value FROM settings WHERE key = 'tracking_enabled'"
@@ -183,6 +193,8 @@ def api_toggle_tracking():
 # Returns the count of deleted rows.
 @app.route("/api/data/before-this-month", methods=["DELETE"])
 def api_delete_before_month():
+    if not check_token():
+        return jsonify({"error": "unauthorized"}), 403
     first_of_month = datetime.now().replace(day=1).strftime("%Y-%m-%d")
     conn = get_db()
     cursor = conn.execute("DELETE FROM time_log WHERE date < ?", (first_of_month,))
@@ -196,6 +208,8 @@ def api_delete_before_month():
 # Returns the count of deleted rows.
 @app.route("/api/data/this-month", methods=["DELETE"])
 def api_delete_this_month():
+    if not check_token():
+        return jsonify({"error": "unauthorized"}), 403
     first_of_month = datetime.now().replace(day=1).strftime("%Y-%m-%d")
     conn = get_db()
     cursor = conn.execute("DELETE FROM time_log WHERE date >= ?", (first_of_month,))
@@ -208,10 +222,10 @@ def api_delete_this_month():
 # ── Dashboard (single-page, no template files needed) ───────────────────────
 
 
-# Serves the dashboard HTML page.
+# Serves the dashboard HTML page with the API token embedded for authenticated requests.
 @app.route("/")
 def dashboard():
-    return DASHBOARD_HTML
+    return DASHBOARD_HTML.replace("__API_TOKEN__", API_TOKEN)
 
 
 DASHBOARD_HTML = """<!DOCTYPE html>
@@ -368,6 +382,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 <script>
 const COLORS = { LeetCode:"#FFA116", "Job Search":"#22D3EE", Gmail:"#F472B6", Streaming:"#EF4444", GitHub:"#A3E635", "VS Code":"#A78BFA" };
 const CATS = ["LeetCode","Job Search","Gmail","Streaming","GitHub","VS Code"];
+const API_TOKEN = "__API_TOKEN__";
+const AUTH_HEADERS = { "X-API-Token": API_TOKEN };
 let period = "today";
 
 /* ── Helpers ─────────────────────────────────────────── */
@@ -398,7 +414,7 @@ function updateGreeting(morningGreeting) {
 
 // Sends POST to toggle tracking and updates button state.
 async function togglePause() {
-  const res = await fetch("/api/toggle-tracking", { method: "POST" });
+  const res = await fetch("/api/toggle-tracking", { method: "POST", headers: AUTH_HEADERS });
   const json = await res.json();
   updatePauseUI(json.tracking_enabled);
 }
@@ -463,7 +479,7 @@ function confirmDelete(target) {
 // Calls the delete API and refreshes the dashboard on success.
 async function executeDelete() {
   if (!_confirmTarget) return;
-  await fetch("/api/data/" + _confirmTarget, { method: "DELETE" });
+  await fetch("/api/data/" + _confirmTarget, { method: "DELETE", headers: AUTH_HEADERS });
   closeModal();
   load();
 }
@@ -634,4 +650,5 @@ if __name__ == "__main__":
     else:
         init_settings()
     print("Dashboard → http://localhost:8050")
-    app.run(host="127.0.0.1", port=8050, debug=True)
+    print(f"API Token → {API_TOKEN} (auto-embedded in dashboard)")
+    app.run(host="127.0.0.1", port=8050, debug=False)

@@ -8,6 +8,7 @@ import sqlite3
 import subprocess
 import time
 import signal
+import stat
 import sys
 import os
 from datetime import datetime
@@ -59,6 +60,8 @@ def init_db():
     conn.execute("INSERT OR IGNORE INTO settings VALUES ('dashboard_opened_today', '')")
     conn.commit()
     conn.close()
+    # Restrict DB file to owner-only read/write
+    os.chmod(DB_PATH, stat.S_IRUSR | stat.S_IWUSR)
 
 
 # Reads the tracking_enabled flag from the settings table.
@@ -162,14 +165,16 @@ def log_entry(category, tab_title):
 
 
 # Fires a macOS notification using osascript.
-# Takes a title string and message string.
+# Takes a title string and message string. Sanitizes inputs to prevent script injection.
 def send_notification(title, message):
+    safe_title = title.replace('\\', '\\\\').replace('"', '\\"')
+    safe_message = message.replace('\\', '\\\\').replace('"', '\\"')
     try:
         subprocess.run(
             [
                 "osascript",
                 "-e",
-                f'display notification "{message}" with title "{title}"',
+                f'display notification "{safe_message}" with title "{safe_title}"',
             ],
             capture_output=True,
             timeout=5,

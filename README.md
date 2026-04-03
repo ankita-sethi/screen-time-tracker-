@@ -17,6 +17,7 @@ A local macOS app that tracks how much time you spend on LeetCode, job search si
 - Incognito windows automatically skipped
 - Data management: delete by month from the dashboard
 - Auto-starts on login via macOS launchd
+- Security: per-session API token on destructive endpoints, owner-only DB file permissions, debug mode disabled, notification input sanitization
 
 ---
 
