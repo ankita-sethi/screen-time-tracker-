@@ -126,19 +126,8 @@ python3 app.py
 
 ---
 
-## Managing the Background Services
+## Uninstall
 
 ```bash
-# Stop everything
-launchctl unload ~/Library/LaunchAgents/com.ankita.screentime-tracker.plist
-launchctl unload ~/Library/LaunchAgents/com.ankita.screentime-dashboard.plist
-launchctl unload ~/Library/LaunchAgents/com.ankita.screentime-morning-open.plist
-
-# Start everything
-launchctl load ~/Library/LaunchAgents/com.ankita.screentime-tracker.plist
-launchctl load ~/Library/LaunchAgents/com.ankita.screentime-dashboard.plist
-launchctl load ~/Library/LaunchAgents/com.ankita.screentime-morning-open.plist
-
-# Check if running
-launchctl list | grep ankita.screentime
+bash uninstall.sh
 ```
