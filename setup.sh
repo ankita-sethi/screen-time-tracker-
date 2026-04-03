@@ -99,9 +99,8 @@ cat > "$PLIST_DIR/com.screentime.morning-open.plist" <<EOF
     <string>com.screentime.morning-open</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>while true; do TODAY=\$(date +%Y-%m-%d); if [ ! -f /tmp/screentime-opened-\$TODAY ] &amp;&amp; pgrep -x "Google Chrome" > /dev/null; then open http://localhost:8050; touch /tmp/screentime-opened-\$TODAY; fi; sleep 30; done</string>
+        <string>/usr/bin/python3</string>
+        <string>${PROJECT_DIR}/open_dashboard.py</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

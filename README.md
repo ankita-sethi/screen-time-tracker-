@@ -1,23 +1,24 @@
 # Screen Time Tracker
 
-A local macOS app that tracks how much time you spend on LeetCode, LinkedIn, and Gmail in Google Chrome, and displays it on a live-updating dashboard. Built for personal productivity — everything runs on your Mac, nothing leaves your machine.
+A local macOS app that tracks how much time you spend on LeetCode, LinkedIn, Gmail, and streaming sites (Netflix, Prime Video) in Google Chrome, and displays it on a live-updating dashboard. Built for personal productivity — everything runs on your Mac, nothing leaves your machine.
 
 ---
 
 ## What We Built
 
-A lightweight screen time tracker that monitors your Google Chrome tabs and logs time spent on LeetCode (job prep), LinkedIn (networking), and Gmail (email). It runs silently in the background, auto-starts when you log in, and shows your stats on a clean dark-themed dashboard at `http://localhost:8050`. You get daily, weekly, and all-time breakdowns with bar charts and a 7-day timeline.
+A lightweight screen time tracker that monitors your Google Chrome tabs and logs time spent on LeetCode (job prep), LinkedIn (networking), Gmail (email), and streaming (Netflix, Prime Video). It runs silently in the background, auto-starts when you log in, and shows your stats on a clean dark-themed dashboard at `http://localhost:8050`. You get daily, weekly, and all-time breakdowns with bar charts, a stacked 7-day chart, streaming alerts, a pause/resume toggle, and data management tools.
 
 ---
 
 ## How It Works
 
 1. When your Mac is on and Chrome is the active app, the tracker polls the current tab every 5 seconds.
-2. It reads the tab's title and URL using macOS AppleScript.
-3. If the tab matches LeetCode, LinkedIn, or Gmail, it logs a 5-second entry to a local SQLite database.
-4. The Flask dashboard queries the database and serves a single-page UI with time cards, bar charts, and a 7-day timeline.
+2. It reads the tab's title and URL using macOS AppleScript. Incognito windows are automatically skipped.
+3. If the tab matches LeetCode, LinkedIn, Gmail, Netflix, or Prime Video, it logs a 5-second entry to a local SQLite database.
+4. The Flask dashboard queries the database and serves a single-page UI with time cards, bar charts, a stacked 7-day chart, and a morning greeting.
 5. The dashboard auto-refreshes every 10 seconds — no manual reload needed.
 6. Three macOS launchd agents handle auto-start: one for the tracker, one for the dashboard, and one that opens the dashboard in your browser once per day when Chrome launches.
+7. Streaming alerts fire as macOS notifications at 30 and 45 minutes per day. Tracking can be paused/resumed from the dashboard.
 
 ---
 
@@ -85,6 +86,7 @@ A lightweight screen time tracker that monitors your Google Chrome tabs and logs
 screen-time-tracker/
 ├── tracker.py          # Polls Chrome, classifies tabs, logs to SQLite
 ├── app.py              # Flask dashboard server + inline HTML/JS frontend
+├── open_dashboard.py   # Auto-opens dashboard once per day when Chrome launches
 ├── setup.sh            # One-command installer (registers launchd agents)
 ├── uninstall.sh        # One-command remover (stops and removes agents)
 ├── requirements.txt    # Python dependencies (flask)
@@ -162,12 +164,18 @@ This stops all services and removes the launchd agents. Your data (`screentime.d
 
 | Area | Status |
 |---|---|
-| Chrome tab tracking (LeetCode, LinkedIn, Gmail) | Done |
+| Chrome tab tracking (LeetCode, LinkedIn, Gmail, Streaming) | Done |
 | SQLite logging | Done |
 | Flask dashboard with live refresh | Done |
 | Auto-start via launchd | Done |
-| Auto-open dashboard on Chrome launch | Done |
+| Auto-open dashboard once per day on Chrome launch | Done |
 | One-command setup and uninstall | Done |
+| Streaming alerts (30min, 45min macOS notifications) | Done |
+| Incognito mode exclusion | Done |
+| Pause/resume tracking toggle | Done |
+| Morning greeting with yesterday's LeetCode stats | Done |
+| Stacked 7-day bar chart | Done |
+| Data management (delete by month) | Done |
 
 ---
 
@@ -176,3 +184,4 @@ This stops all services and removes the launchd agents. Your data (`screentime.d
 - Only tracks Google Chrome (not Safari, Firefox, or Arc).
 - AppleScript requires accessibility permissions — macOS may prompt you on first run.
 - The dashboard uses inline HTML/CSS/JS in `app.py`, so UI changes require editing Python.
+- YouTube is intentionally excluded from streaming tracking.
