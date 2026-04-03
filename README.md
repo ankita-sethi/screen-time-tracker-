@@ -1,20 +1,20 @@
 # Screen Time Tracker
 
-A local macOS app that tracks how much time you spend on LeetCode, LinkedIn, Gmail, and streaming sites (Netflix, Prime Video) in Google Chrome, and displays it on a live-updating dashboard. Built for personal productivity — everything runs on your Mac, nothing leaves your machine.
+A local macOS app that tracks how much time you spend on LeetCode, LinkedIn, Gmail, GitHub, and streaming sites (Netflix, Prime Video) in Google Chrome — plus VS Code as a native app — and displays it on a live-updating dashboard. Built for personal productivity — everything runs on your Mac, nothing leaves your machine.
 
 ---
 
 ## What We Built
 
-A lightweight screen time tracker that monitors your Google Chrome tabs and logs time spent on LeetCode (job prep), LinkedIn (networking), Gmail (email), and streaming (Netflix, Prime Video). It runs silently in the background, auto-starts when you log in, and shows your stats on a clean dark-themed dashboard at `http://localhost:8050`. You get daily, weekly, and all-time breakdowns with bar charts, a stacked 7-day chart, streaming alerts, a pause/resume toggle, and data management tools.
+A lightweight screen time tracker that monitors your Google Chrome tabs and VS Code usage, logging time spent on LeetCode (job prep), LinkedIn (networking), Gmail (email), GitHub (code), streaming (Netflix, Prime Video), and VS Code (editor). It runs silently in the background, auto-starts when you log in, and shows your stats on a clean dark-themed dashboard at `http://localhost:8050`. You get daily, weekly, and all-time breakdowns with bar charts, a stacked 7-day chart, streaming alerts, a pause/resume toggle, and data management tools. Cards are adaptive — only categories with tracked time appear.
 
 ---
 
 ## How It Works
 
-1. When your Mac is on and Chrome is the active app, the tracker polls the current tab every 5 seconds.
-2. It reads the tab's title and URL using macOS AppleScript. Incognito windows are automatically skipped.
-3. If the tab matches LeetCode, LinkedIn, Gmail, Netflix, or Prime Video, it logs a 5-second entry to a local SQLite database.
+1. When your Mac is on, the tracker polls the active app every 5 seconds.
+2. If Chrome is in front, it reads the tab's title and URL using macOS AppleScript. Incognito windows are automatically skipped. If VS Code is in front, it detects the app by name.
+3. If the tab matches LeetCode, LinkedIn, Gmail, GitHub, Netflix, or Prime Video — or VS Code is active — it logs a 5-second entry to a local SQLite database.
 4. The Flask dashboard queries the database and serves a single-page UI with time cards, bar charts, a stacked 7-day chart, and a morning greeting.
 5. The dashboard auto-refreshes every 10 seconds — no manual reload needed.
 6. Three macOS launchd agents handle auto-start: one for the tracker, one for the dashboard, and one that opens the dashboard in your browser once per day when Chrome launches.
@@ -38,19 +38,21 @@ A lightweight screen time tracker that monitors your Google Chrome tabs and logs
 ## Architecture
 
 ```
-                      +-------------------+
-                      |   Google Chrome   |
-                      |   (your tabs)     |
-                      +---------+---------+
-                                |
-                       AppleScript reads
-                       active tab title + URL
-                                |
-                                v
-                      +-------------------+
-                      |   tracker.py      |
-                      |   (polls every 5s)|
-                      +---------+---------+
+  +-------------------+       +-------------------+
+  |   Google Chrome   |       |     VS Code       |
+  |   (your tabs)     |       |  (native app)     |
+  +---------+---------+       +---------+---------+
+            |                           |
+   AppleScript reads             Detected by app
+   active tab title + URL        name ("Code")
+            |                           |
+            +-------------+-------------+
+                          |
+                          v
+                +-------------------+
+                |   tracker.py      |
+                |   (polls every 5s)|
+                +---------+---------+
                                 |
                            writes rows
                                 |
@@ -84,7 +86,7 @@ A lightweight screen time tracker that monitors your Google Chrome tabs and logs
 
 ```
 screen-time-tracker/
-├── tracker.py          # Polls Chrome, classifies tabs, logs to SQLite
+├── tracker.py          # Polls Chrome + VS Code, classifies activity, logs to SQLite
 ├── app.py              # Flask dashboard server + inline HTML/JS frontend
 ├── open_dashboard.py   # Auto-opens dashboard once per day when Chrome launches
 ├── setup.sh            # One-command installer (registers launchd agents)
@@ -164,7 +166,9 @@ This stops all services and removes the launchd agents. Your data (`screentime.d
 
 | Area | Status |
 |---|---|
-| Chrome tab tracking (LeetCode, LinkedIn, Gmail, Streaming) | Done |
+| Chrome tab tracking (LeetCode, LinkedIn, Gmail, GitHub, Streaming) | Done |
+| VS Code tracking (native app detection) | Done |
+| Adaptive cards (hide categories with 0 time) | Done |
 | SQLite logging | Done |
 | Flask dashboard with live refresh | Done |
 | Auto-start via launchd | Done |
@@ -181,7 +185,7 @@ This stops all services and removes the launchd agents. Your data (`screentime.d
 
 ## Known Issues
 
-- Only tracks Google Chrome (not Safari, Firefox, or Arc).
+- Chrome tracking only covers Chrome (not Safari, Firefox, or Arc). VS Code is tracked as a native app.
 - AppleScript requires accessibility permissions — macOS may prompt you on first run.
 - The dashboard uses inline HTML/CSS/JS in `app.py`, so UI changes require editing Python.
 - YouTube is intentionally excluded from streaming tracking.
