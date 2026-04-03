@@ -11,11 +11,11 @@ app = Flask(__name__)
 
 CATEGORIES = {
     "LeetCode": "#FFA116",
-    "LinkedIn": "#0A66C2",
-    "Gmail": "#EA4335",
-    "Streaming": "#E50914",
-    "GitHub": "#8957e5",
-    "VS Code": "#007ACC",
+    "Job Search": "#22D3EE",
+    "Gmail": "#F472B6",
+    "Streaming": "#EF4444",
+    "GitHub": "#A3E635",
+    "VS Code": "#A78BFA",
 }
 
 
@@ -150,7 +150,7 @@ def api_weekly():
                 "date": date_str,
                 "label": label,
                 "LeetCode": entry.get("LeetCode", 0),
-                "LinkedIn": entry.get("LinkedIn", 0),
+                "Job Search": entry.get("Job Search", 0),
                 "Gmail": entry.get("Gmail", 0),
                 "Streaming": entry.get("Streaming", 0),
                 "GitHub": entry.get("GitHub", 0),
@@ -322,7 +322,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <button class="manage-btn" onclick="openModal()">Manage Data</button>
     <div class="header-center">
       <h1><span class="live-dot"></span>Screen Time Tracker<span id="pausedBadge" class="paused-badge" style="display:none">Paused</span></h1>
-      <p class="subtitle">Tracking LeetCode · LinkedIn · Gmail · Streaming · GitHub · VS Code</p>
+      <p class="subtitle">Tracking LeetCode · Job Search · Gmail · Streaming · GitHub · VS Code</p>
     </div>
     <button class="pause-btn" id="pauseBtn" onclick="togglePause()">Tracking Active</button>
   </div>
@@ -348,11 +348,11 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <div class="chart-title">Last 7 Days</div>
     <div class="chart-legend" id="legend">
       <span><span class="legend-dot" style="background:#FFA116"></span>LeetCode</span>
-      <span><span class="legend-dot" style="background:#0A66C2"></span>LinkedIn</span>
-      <span><span class="legend-dot" style="background:#EA4335"></span>Gmail</span>
-      <span><span class="legend-dot" style="background:#E50914"></span>Streaming</span>
-      <span><span class="legend-dot" style="background:#8957e5"></span>GitHub</span>
-      <span><span class="legend-dot" style="background:#007ACC"></span>VS Code</span>
+      <span><span class="legend-dot" style="background:#22D3EE"></span>Job Search</span>
+      <span><span class="legend-dot" style="background:#F472B6"></span>Gmail</span>
+      <span><span class="legend-dot" style="background:#EF4444"></span>Streaming</span>
+      <span><span class="legend-dot" style="background:#A3E635"></span>GitHub</span>
+      <span><span class="legend-dot" style="background:#A78BFA"></span>VS Code</span>
     </div>
     <canvas id="weeklyChart" height="260"></canvas>
   </div>
@@ -366,8 +366,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </div>
 
 <script>
-const COLORS = { LeetCode:"#FFA116", LinkedIn:"#0A66C2", Gmail:"#EA4335", Streaming:"#E50914", GitHub:"#8957e5", "VS Code":"#007ACC" };
-const CATS = ["LeetCode","LinkedIn","Gmail","Streaming","GitHub","VS Code"];
+const COLORS = { LeetCode:"#FFA116", "Job Search":"#22D3EE", Gmail:"#F472B6", Streaming:"#EF4444", GitHub:"#A3E635", "VS Code":"#A78BFA" };
+const CATS = ["LeetCode","Job Search","Gmail","Streaming","GitHub","VS Code"];
 let period = "today";
 
 /* ── Helpers ─────────────────────────────────────────── */

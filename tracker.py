@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Screen Time Tracker — polls the active Chrome tab every 5 seconds
-and logs time on LeetCode, LinkedIn, Gmail, and Streaming to SQLite.
+and logs time on LeetCode, Job Search, Gmail, and Streaming to SQLite.
 """
 
 import sqlite3
@@ -17,7 +17,10 @@ POLL_INTERVAL = 5  # seconds
 
 SITE_RULES = [
     {"keyword": "leetcode", "category": "LeetCode"},
-    {"keyword": "linkedin", "category": "LinkedIn"},
+    {"keyword": "linkedin", "category": "Job Search"},
+    {"keyword": "workday", "category": "Job Search"},
+    {"keyword": "/career", "category": "Job Search"},
+    {"keyword": "/job", "category": "Job Search"},
     {"keyword": "gmail", "category": "Gmail"},
     {"keyword": "mail.google", "category": "Gmail"},
     {"keyword": "netflix.com", "category": "Streaming"},
@@ -225,7 +228,7 @@ def run():
     init_db()
     print(f"Screen Time Tracker started (PID {os.getpid()})")
     print(f"Logging to {DB_PATH}")
-    print("Tracking: LeetCode · LinkedIn · Gmail · Streaming · GitHub · VS Code")
+    print("Tracking: LeetCode · Job Search · Gmail · Streaming · GitHub · VS Code")
     print(f"Polling every {POLL_INTERVAL}s — Ctrl+C to stop.\n")
 
     signal.signal(signal.SIGINT, lambda *_: (print("\nStopped."), sys.exit(0)))
