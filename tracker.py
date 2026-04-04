@@ -164,23 +164,29 @@ def log_entry(category, tab_title):
     conn.close()
 
 
-# Fires a macOS notification using osascript.
+# Fires a macOS notification using osascript via System Events.
+# Uses System Events explicitly so notifications work reliably from launchd agents.
 # Takes a title string and message string. Sanitizes inputs to prevent script injection.
 def send_notification(title, message):
     safe_title = title.replace('\\', '\\\\').replace('"', '\\"')
     safe_message = message.replace('\\', '\\\\').replace('"', '\\"')
+    script = (
+        f'tell application "System Events" to display notification '
+        f'"{safe_message}" with title "{safe_title}"'
+    )
     try:
-        subprocess.run(
-            [
-                "osascript",
-                "-e",
-                f'display notification "{safe_message}" with title "{safe_title}"',
-            ],
+        result = subprocess.run(
+            ["osascript", "-e", script],
             capture_output=True,
+            text=True,
             timeout=5,
         )
-    except Exception:
-        pass
+        if result.returncode != 0:
+            print(f"[ALERT FAILED] {title}: {message} — {result.stderr.strip()}")
+        else:
+            print(f"[ALERT SENT] {title}: {message}")
+    except Exception as e:
+        print(f"[ALERT ERROR] {title}: {message} — {e}")
 
 
 # Checks today's streaming total and fires alerts at 30min and 45min.
